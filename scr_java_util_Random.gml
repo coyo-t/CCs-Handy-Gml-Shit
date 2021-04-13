@@ -115,8 +115,9 @@ end
 
 ///@func  RandomDt
 ///@param [fps_rate]
+///@param [rate_type]
 ///@param [seed]
-function RandomDt (_rate, _seed) : Random(_seed) constructor begin
+function RandomDt (_rate, _rate_type, _seed) : Random(_seed) constructor begin
 	__last_time = -infinity;
 	__last_val = 0;
 	__rate_ms = 0;
@@ -140,20 +141,38 @@ function RandomDt (_rate, _seed) : Random(_seed) constructor begin
 	
 	///@func set_rate
 	///@param new_rate
-	static set_rate = function (_rate)
+	///@param rate_type
+	static set_rate = function (_rate, _rate_type)
 	{
 		__last_time = -infinity;
-		__rate_ms = 1000000 div _rate;
+		
+		switch (_rate_type)
+		{
+			case gamespeed_fps:
+				__rate_ms = 1000000 div _rate;
+				break;
+			case gamespeed_microseconds:
+				__rate_ms = _rate;
+				break;
+			default:
+				__rate_ms = game_get_speed(gamespeed_microseconds);
+				break;
+		}
 	}
 	
 	
 #region constructor
+	if (is_undefined(_rate_type))
+	{
+		_rate_type = gamespeed_microseconds;
+	}
+	
 	if (is_undefined(_rate))
 	{
 		__rate_ms = game_get_speed(gamespeed_microseconds);
 		return;
 	}
 	
-	set_rate(_rate);
+	set_rate(_rate, _rate_type);
 #endregion
 end
